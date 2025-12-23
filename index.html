@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>內部運費試算工具</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f2f2f2; }
+.container { max-width:800px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; }
+h2 { margin-top:0; }
+label { display:block; margin-top:12px; font-weight:bold; }
+input, select, button { width:100%; padding:8px; margin-top:5px; }
+button { margin-top:20px; font-size:16px; }
+.result { margin-top:20px; padding:15px; border-radius:6px; }
+.ok { background:#e7f5ff; }
+.stop { background:#f8d7da; }
+.note { font-size:13px; color:#555; }
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>內部運費試算工具</h2>
+<div class="note">前提：單段配送 / 上班時間 / 不含組裝 / 無管委限制</div>
+
+<label>配送地區</label>
+<select id="region">
+  <option value="1500">雙北桃</option>
+  <option value="2800">新竹</option>
+  <option value="3500">宜苗</option>
+  <option value="5000">中彰投</option>
+  <option value="7000">雲嘉南</option>
+  <option value="9000">高屏</option>
+  <option value="9000">花東</option>
+</select>
+
+<label>同一地址配送件數</label>
+<input type="number" id="qty" value="1" min="1">
+
+<label>是否多地址配送</label>
+<select id="multi">
+  <option value="no">否</option>
+  <option value="yes">是（需人工確認）</option>
+</select>
+
+<label>上樓條件</label>
+<select id="stairs">
+  <option value="none">不上樓</option>
+  <option value="elevator">有電梯 (+200)</option>
+  <option value="noelevator">無電梯</option>
+</select>
+
+<label>樓層（無電梯才填）</label>
+<input type="number" id="floor" value="1" min="1">
+
+<label>單件最大重量 (kg)</label>
+<input type="number" id="weight" value="10">
+
+<label>單件最長邊 (cm)</label>
+<input type="number" id="length" value="100">
+
+<button onclick="calc()">試算運費</button>
+
+<div id="output"></div>
+</div>
+
+<script>
+function calc(){
+  let base = parseInt(region.value);
+  let qty = parseInt(qtyEl.value);
+}
+</script>
+
+<script>
+const region = document.getElementById("region");
+const qtyEl = document.getElementById("qty");
+const stairs = document.getElementById("stairs");
+const floor = document.getElementById("floor");
+const weight = document.getElementById("weight");
+const length = document.getElementById("length");
+const multi = document.getElementById("multi");
+const output = document.getElementById("output");
+
+function calc(){
+  let total = parseInt(region.value);
+  let notes = [];
+  let stop = false;
+
+  if(qtyEl.value > 1){
+    total += (qtyEl.value - 1) * 500;
+    notes.push("同址多件");
+  }
+
+  if(stairs.value === "elevator"){
+    total += 200;
+    notes.push("有電梯");
+  }
+
+  if(stairs.value === "noelevator"){
+    if(floor.value >= 7){
+      stop = true;
+      notes.push("無電梯7F以上");
+    } else {
+      total += floor.value * 100;
+      notes.push("無電梯上樓");
+    }
+  }
+
+  if(weight.value > 30){
+    total += (weight.value - 30) * 10;
+    notes.push("超重");
+    if(stairs.value === "noelevator") stop = true;
+  }
+
+  if(length.value > 310){
+    stop = true;
+    notes.push("尺寸超過310cm");
+  } else if(length.value > 260){
+    total += 800;
+    notes.push("大型尺寸");
+  } else if(length.value > 200){
+    total += 300;
+    notes.push("中大型尺寸");
+  }
+
+  if(multi.value === "yes"){
+    stop = true;
+    notes.push("多地址配送");
+  }
+
+  if(stop){
+    output.innerHTML = `<div class="result stop">
+    ⚠️ 需人工確認<br><br>${notes.join(" / ")}</div>`;
+  } else {
+    output.innerHTML = `<div class="result ok">
+    試算運費：NT$ ${total}<br><br>${notes.join(" / ") || "標準配送"}
+    </div>`;
+  }
+}
+</script>
+</body>
+</html>
