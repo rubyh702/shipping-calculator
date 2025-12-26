@@ -2,139 +2,343 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>內部運費試算工具</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>內部運費試算工具（宇宙人 / 鐵快）</title>
 <style>
-body { font-family: Arial, sans-serif; background:#f2f2f2; }
-.container { max-width:800px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; }
-h2 { margin-top:0; }
-label { display:block; margin-top:12px; font-weight:bold; }
-input, select, button { width:100%; padding:8px; margin-top:5px; }
-button { margin-top:20px; font-size:16px; }
-.result { margin-top:20px; padding:15px; border-radius:6px; }
-.ok { background:#e7f5ff; }
-.stop { background:#f8d7da; }
-.note { font-size:13px; color:#555; }
+  body { font-family: Arial, sans-serif; background:#f2f2f2; margin:0; }
+  .container { max-width:980px; margin:24px auto; background:#fff; padding:18px; border-radius:10px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  h2 { margin:0 0 6px 0; }
+  .sub { color:#555; font-size:13px; margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
+  .card { border:1px solid #e6e6e6; border-radius:10px; padding:14px; }
+  .card h3{ margin:0 0 10px 0; font-size:16px; }
+  label { display:block; margin-top:10px; font-weight:700; font-size:13px; }
+  input, select, button { width:100%; padding:9px; margin-top:6px; box-sizing:border-box; border-radius:8px; border:1px solid #ccc; }
+  button { margin-top:14px; font-size:16px; cursor:pointer; }
+  .results { display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:16px; }
+  @media (max-width: 900px){ .results{ grid-template-columns:1fr; } }
+  .resultBox { border-radius:10px; padding:14px; border:1px solid #e6e6e6; }
+  .ok { background:#e7f5ff; }
+  .stop { background:#f8d7da; }
+  .muted { color:#666; font-size:12px; line-height:1.5; }
+  .pill { display:inline-block; font-size:12px; padding:3px 8px; border-radius:999px; border:1px solid rgba(0,0,0,.15); margin-left:8px; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  @media (max-width: 900px){ .row2,.row3{ grid-template-columns:1fr; } }
 </style>
 </head>
 
 <body>
-<div class="container">
-<h2>內部運費試算工具</h2>
-<div class="note">前提：單段配送 / 上班時間 / 不含組裝 / 無管委限制</div>
+  <div class="container">
+    <h2>內部運費試算工具</h2>
+    <div class="sub">同頁面上下排列（同時計算兩家），方便比較/核對。前提：單段配送 / 廠商上班時間 / 不含組裝 / 無管委限制（如有例外請人工確認）。</div>
 
-<label>配送地區</label>
-<select id="region">
-  <option value="1500">雙北桃</option>
-  <option value="2800">新竹</option>
-  <option value="3500">宜苗</option>
-  <option value="5000">中彰投</option>
-  <option value="7000">雲嘉南</option>
-  <option value="9000">高屏</option>
-  <option value="9000">花東</option>
-</select>
+    <div class="grid">
+      <div class="card">
+        <h3>共用輸入 <span class="pill">填一次，兩家都會算</span></h3>
 
-<label>同一地址配送件數</label>
-<input type="number" id="qty" value="1" min="1">
+        <label>同一地址配送件數</label>
+        <input type="number" id="qty" value="1" min="1">
 
-<label>是否多地址配送</label>
-<select id="multi">
-  <option value="no">否</option>
-  <option value="yes">是（需人工確認）</option>
-</select>
+        <label>是否多地址配送</label>
+        <select id="multi">
+          <option value="no">否</option>
+          <option value="yes">是（需人工確認）</option>
+        </select>
 
-<label>上樓條件</label>
-<select id="stairs">
-  <option value="none">不上樓</option>
-  <option value="elevator">有電梯 (+200)</option>
-  <option value="noelevator">無電梯</option>
-</select>
+        <label>上樓條件</label>
+        <select id="stairs">
+          <option value="none">不上樓</option>
+          <option value="elevator">有電梯</option>
+          <option value="noelevator">無電梯</option>
+        </select>
 
-<label>樓層（無電梯才填）</label>
-<input type="number" id="floor" value="1" min="1">
+        <div class="row2">
+          <div>
+            <label>樓層（無電梯才填）</label>
+            <input type="number" id="floor" value="1" min="1">
+          </div>
+          <div>
+            <label>是否特殊地點（公家機關/醫院/學校）</label>
+            <select id="specialPlace">
+              <option value="no">否</option>
+              <option value="yes">是（需人工確認）</option>
+            </select>
+          </div>
+        </div>
 
-<label>單件最大重量 (kg)</label>
-<input type="number" id="weight" value="10">
+        <label>單件最大重量 (kg)</label>
+        <input type="number" id="weight" value="10" min="0" step="0.1">
 
-<label>單件最長邊 (cm)</label>
-<input type="number" id="length" value="100">
+        <label>尺寸 (cm)（鐵快畫/鏡/沙發會用到；若只想算宇宙人，可只填「最長邊」）</label>
+        <div class="row3">
+          <div><input type="number" id="len" value="100" min="0" step="0.1" placeholder="長"></div>
+          <div><input type="number" id="wid" value="50" min="0" step="0.1" placeholder="寬"></div>
+          <div><input type="number" id="hei" value="30" min="0" step="0.1" placeholder="高"></div>
+        </div>
 
-<button onclick="calc()">試算運費</button>
+        <div class="muted" style="margin-top:10px;">
+          小提醒：尺寸/重量接近上限、或有上樓/特殊地點/多地址，系統會提示「需人工確認」。
+        </div>
 
-<div id="output"></div>
-</div>
+        <button onclick="calcAll()">同時計算兩家</button>
+      </div>
+
+      <div class="card">
+        <h3>宇宙人（3.5噸升降尾車） <span class="pill">分區域</span></h3>
+
+        <label>配送地區（宇宙人）</label>
+        <select id="u_region">
+          <option value="1500">雙北桃</option>
+          <option value="2800">新竹</option>
+          <option value="3500">宜苗</option>
+          <option value="5000">中彰投</option>
+          <option value="7000">雲嘉南</option>
+          <option value="9000">高屏</option>
+          <option value="9000">花東</option>
+        </select>
+
+        <div class="muted" style="margin-top:10px;">
+          宇宙人基礎：送 1 樓、門口、無階梯、件數 1 件。<br>
+          同址第 2 件起 +NT$500；無電梯每層 +NT$100；有電梯每地點 +NT$200（不限樓層）。<br>
+          長形物件最長至 310cm；如需上樓且貨物超過 30kg：6F(含)內超過部分每公斤 +NT$10，7F 以上另詢。<br>
+          多地址/超規/超時段等，建議人工確認。
+        </div>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:14px 0;">
+
+        <h3>鐵快 <span class="pill">北中南同價（限制區域）</span></h3>
+
+        <label>品項（鐵快）</label>
+        <select id="tk_item">
+          <option value="rug">地毯</option>
+          <option value="art">畫 / 鏡</option>
+          <option value="sofa">沙發</option>
+        </select>
+
+        <label>配送區域（鐵快）</label>
+        <select id="tk_area">
+          <option value="north">北部（同價）</option>
+          <option value="central">中部（同價）</option>
+          <option value="south">南部（同價；不含屏東縣）</option>
+          <option value="yilan">宜蘭（另報）</option>
+          <option value="hualien">花蓮（另報）</option>
+          <option value="pt_city">屏東市（另報）</option>
+          <option value="pt_county">屏東縣（不收）</option>
+          <option value="taitung">台東（不收）</option>
+        </select>
+
+        <label>是否需要搬運協助（僅鐵快、有電梯且符合條件）</label>
+        <select id="tk_carry">
+          <option value="no">否</option>
+          <option value="yes">是（會加價）</option>
+        </select>
+
+        <div class="muted" style="margin-top:10px;">
+          地毯：200cm內+30kg內=NT$1000；250cm內+40kg內=NT$1500。<br>
+          畫/鏡：NT$35/單位；單位= (長×寬×高)/900 取整數（進位）。<br>
+          沙發：NT$50/cuft（材積；系統以尺寸換算 cuft 並進位）。<br>
+          備註：不含屏東縣；宜蘭/花蓮/屏東市另報；台東與屏東縣不收；公家/醫院/學校另計；報價不含 5%。
+        </div>
+      </div>
+    </div>
+
+    <div class="results">
+      <div id="u_out" class="resultBox ok">宇宙人：請先填資料後按「同時計算兩家」。</div>
+      <div id="tk_out" class="resultBox ok">鐵快：請先填資料後按「同時計算兩家」。</div>
+    </div>
+  </div>
 
 <script>
-function calc(){
-  let base = parseInt(region.value);
-  let qty = parseInt(qtyEl.value);
+function ceilInt(x){
+  if(!isFinite(x)) return 0;
+  return Math.ceil(x);
 }
-</script>
+function n(v){ return parseFloat(v||0); }
 
-<script>
-const region = document.getElementById("region");
-const qtyEl = document.getElementById("qty");
-const stairs = document.getElementById("stairs");
-const floor = document.getElementById("floor");
-const weight = document.getElementById("weight");
-const length = document.getElementById("length");
-const multi = document.getElementById("multi");
-const output = document.getElementById("output");
+function calcUniverse(){
+  const base = parseInt(document.getElementById("u_region").value,10);
+  const qty = parseInt(document.getElementById("qty").value,10) || 1;
+  const stairs = document.getElementById("stairs").value;
+  const floor = parseInt(document.getElementById("floor").value,10) || 0;
+  const weight = n(document.getElementById("weight").value);
+  const len = n(document.getElementById("len").value);
 
-function calc(){
-  let total = parseInt(region.value);
+  const multi = document.getElementById("multi").value;
+  const specialPlace = document.getElementById("specialPlace").value;
+
+  let total = base;
   let notes = [];
-  let stop = false;
+  let needManual = false;
 
-  if(qtyEl.value > 1){
-    total += (qtyEl.value - 1) * 500;
-    notes.push("同址多件");
+  if(qty > 1){
+    total += (qty - 1) * 500;
+    notes.push("同址多件 +500/件");
   }
 
-  if(stairs.value === "elevator"){
+  if(stairs === "elevator"){
     total += 200;
-    notes.push("有電梯");
+    notes.push("有電梯 +200/地點");
   }
-
-  if(stairs.value === "noelevator"){
-    if(floor.value >= 7){
-      stop = true;
-      notes.push("無電梯7F以上");
-    } else {
-      total += floor.value * 100;
-      notes.push("無電梯上樓");
+  if(stairs === "noelevator"){
+    if(floor >= 7){
+      needManual = true;
+      notes.push("無電梯 7F+ 需另議");
+    }else{
+      total += floor * 100;
+      notes.push("無電梯 +100/層");
     }
   }
 
-  if(weight.value > 30){
-    total += (weight.value - 30) * 10;
-    notes.push("超重");
-    if(stairs.value === "noelevator") stop = true;
+  if(len > 310){
+    needManual = true;
+    notes.push("最長邊 >310cm（超規）");
+  }else if(len > 260){
+    notes.push("大型（>260cm）建議再確認");
   }
 
-  if(length.value > 310){
-    stop = true;
-    notes.push("尺寸超過310cm");
-  } else if(length.value > 260){
-    total += 800;
-    notes.push("大型尺寸");
-  } else if(length.value > 200){
-    total += 300;
-    notes.push("中大型尺寸");
+  if(weight > 30 && stairs !== "none"){
+    if(stairs === "noelevator"){
+      if(floor >= 7){
+        needManual = true;
+      }else{
+        total += (weight - 30) * 10;
+        notes.push("上樓且>30kg：超過部分 +10/kg（6F內）");
+      }
+    }else{
+      notes.push("有電梯且>30kg：建議人工確認");
+    }
   }
 
-  if(multi.value === "yes"){
-    stop = true;
-    notes.push("多地址配送");
+  if(multi === "yes"){
+    needManual = true;
+    notes.push("多地址配送（需人工確認）");
+  }
+  if(specialPlace === "yes"){
+    needManual = true;
+    notes.push("公家/醫院/學校（可能加費）");
   }
 
-  if(stop){
-    output.innerHTML = `<div class="result stop">
-    ⚠️ 需人工確認<br><br>${notes.join(" / ")}</div>`;
-  } else {
-    output.innerHTML = `<div class="result ok">
-    試算運費：NT$ ${total}<br><br>${notes.join(" / ") || "標準配送"}
-    </div>`;
+  return { total, notes, needManual };
+}
+
+function calcTieKuai(){
+  const item = document.getElementById("tk_item").value;
+  const area = document.getElementById("tk_area").value;
+  const carry = document.getElementById("tk_carry").value;
+
+  const qty = parseInt(document.getElementById("qty").value,10) || 1;
+  const stairs = document.getElementById("stairs").value;
+  const weight = n(document.getElementById("weight").value);
+
+  const L = n(document.getElementById("len").value);
+  const W = n(document.getElementById("wid").value);
+  const H = n(document.getElementById("hei").value);
+
+  const multi = document.getElementById("multi").value;
+  const specialPlace = document.getElementById("specialPlace").value;
+
+  let total = 0;
+  let notes = [];
+  let needManual = false;
+
+  if(area === "pt_county" || area === "taitung"){
+    needManual = true;
+    notes.push("該區域不收（需改用其他物流/另議）");
+  }else if(area === "yilan" || area === "hualien" || area === "pt_city"){
+    needManual = true;
+    notes.push("該區域需另報");
   }
+
+  if(multi === "yes"){
+    needManual = true;
+    notes.push("多地址配送（需人工確認）");
+  }
+  if(specialPlace === "yes"){
+    needManual = true;
+    notes.push("公家/醫院/學校（另計費）");
+  }
+
+  if(item === "rug"){
+    if(L <= 200 && weight <= 30){
+      total = 1000;
+    }else if(L <= 250 && weight <= 40){
+      total = 1500;
+    }else{
+      needManual = true;
+      notes.push("地毯超出 250cm 或 40kg（需另報/改配）");
+    }
+    if(carry === "yes"){
+      if(stairs !== "elevator"){
+        needManual = true;
+        notes.push("選擇搬運協助但非有電梯（需人工確認）");
+      }else{
+        total += 50 * qty;
+        notes.push("搬運協助：地毯 +50/件");
+      }
+    }
+  }
+
+  if(item === "art"){
+    if(L <= 0 || W <= 0 || H <= 0){
+      needManual = true;
+      notes.push("畫/鏡需填長寬高（cm）");
+    }else{
+      const unit = ceilInt((L * W * H) / 900.0);
+      total = 35 * unit;
+      notes.push(`單位=${unit}（進位）`);
+    }
+    if(carry === "yes"){
+      if(stairs !== "elevator"){
+        needManual = true;
+        notes.push("選擇搬運協助但非有電梯（需人工確認）");
+      }else{
+        total += 15 * qty;
+        notes.push("搬運協助：畫/鏡 +15/件");
+      }
+    }
+  }
+
+  if(item === "sofa"){
+    if(L <= 0 || W <= 0 || H <= 0){
+      needManual = true;
+      notes.push("沙發需填長寬高（cm）以換算材積");
+    }else{
+      const cm3 = L * W * H;
+      const cuft = cm3 / 28316.846592;
+      const cuft_ceil = ceilInt(cuft);
+      total = 50 * cuft_ceil;
+      notes.push(`材積=${cuft.toFixed(2)} cuft，計價=${cuft_ceil} cuft（進位）`);
+    }
+    if(carry === "yes"){
+      needManual = true;
+      notes.push("沙發搬運加價未明確（需人工確認）");
+    }
+  }
+
+  notes.push("報價不含 5%");
+  return { total, notes, needManual };
+}
+
+function renderBox(elId, title, r){
+  const el = document.getElementById(elId);
+  const notesText = r.notes.length ? ("<div class='muted' style='margin-top:8px;'>" + r.notes.join(" / ") + "</div>") : "";
+  if(r.needManual){
+    el.className = "resultBox stop";
+    el.innerHTML = `<b>${title}</b><br><div style="margin-top:8px;">⚠️ 需人工確認（可作為參考）</div>
+                    <div style="margin-top:8px;">試算金額：<b>${isFinite(r.total)?("NT$ "+Math.round(r.total)):"-"}</b></div>${notesText}`;
+  }else{
+    el.className = "resultBox ok";
+    el.innerHTML = `<b>${title}</b><br><div style="margin-top:8px;">試算金額：<b>NT$ ${Math.round(r.total)}</b></div>${notesText}`;
+  }
+}
+
+function calcAll(){
+  const u = calcUniverse();
+  const t = calcTieKuai();
+  renderBox("u_out","方案 A｜宇宙人（分區域）",u);
+  renderBox("tk_out","方案 B｜鐵快（北中南同價/限制區域）",t);
 }
 </script>
 </body>
